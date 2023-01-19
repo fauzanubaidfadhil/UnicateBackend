@@ -25,6 +25,21 @@ async function regisValidation(req, res, next) {
     errorActive = true;
   }
 
+  if (username === "" || username === null) {
+    errorMessage = "Username is required!";
+    errorActive = true;
+  }
+
+  if (fullname === "" || fullname === null) {
+    errorMessage = "Fullname is required!";
+    errorActive = true;
+  }
+
+  if (email === "" || email === null) {
+    errorMessage = "Email is required!";
+    errorActive = true;
+  }
+
   if (errorActive) return res.status(400).json({ message: errorMessage });
 
   next();
@@ -74,16 +89,17 @@ async function userRegis(req, res) {
       });
     });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({ message: "Something went wrong!" });
   }
 }
 
 // login dan validattion login
 async function validationLogin(req, res, next) {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   try {
-    if (email === undefined)
-      return res.status(400).json({ message: "Email required!" });
+    if (username === undefined)
+      return res.status(400).json({ message: "Username required!" });
     if (password === undefined)
       return res.status(400).json({ message: "Password required!" });
 
@@ -95,10 +111,10 @@ async function validationLogin(req, res, next) {
 }
 
 async function userLogin(req, res) {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   try {
     const [checkUser] = await query(`
-      SELECT id, password FROM users WHERE email = '${email}';
+      SELECT id, password FROM users WHERE username = '${username}';
     `);
 
     if (checkUser === undefined)
@@ -106,7 +122,7 @@ async function userLogin(req, res) {
 
     const matchPassword = await bcrypt.compare(password, checkUser.password);
     if (!matchPassword)
-      return res.status(400).json({ message: "Invalid email/password!" });
+      return res.status(400).json({ message: "Invalid username/password!" });
 
     const [userData] = await query(`
       SELECT id, username, fullname, email FROM users WHERE id = ${checkUser.id} 
